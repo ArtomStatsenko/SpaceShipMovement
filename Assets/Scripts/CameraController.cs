@@ -37,11 +37,69 @@ public sealed class CameraController : MonoBehaviour
         if (!_isCameraDisabled)
         {
             Rotate();
+
+//#if UNITY_EDITOR
+//            MouseClickRotate();
+//#elif UNITY_ANDROID || UNITY_IOS
+//            TouchRotate();
+//#endif
             Zoom();
             FollowTarget();
         }
     }
-    
+
+    float angleX = 0;
+    float angleY = 0;
+    float angleXTemp = 0;
+    float angleYTemp = 0;
+    Vector3 firstPoint = Vector3.zero;
+    Vector3 secondPoint = Vector3.zero;
+
+    private void MouseClickRotate()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            firstPoint = Input.mousePosition;
+            angleXTemp = angleX;
+            angleYTemp = angleY;
+        }
+
+        if (Input.GetMouseButton(0))
+        {
+            secondPoint = Input.mousePosition;
+            angleX = angleXTemp + (secondPoint.x - firstPoint.x) * 180 / Screen.width;
+            angleY = angleYTemp + (secondPoint.y - firstPoint.y) * 180 / Screen.height;
+            Quaternion rotation = Quaternion.Euler(angleY, angleX, 0f);
+            _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
+        }
+    }
+
+    private void TouchRotate()
+    {
+        if (Input.touchCount <= 0)
+        {
+            return;
+        }
+
+        Touch touch = Input.GetTouch(0);
+
+        if (touch.phase == TouchPhase.Began)
+        {
+            firstPoint = touch.position;
+            angleXTemp = angleX;
+            angleYTemp = angleY;
+        }
+
+        if (touch.phase == TouchPhase.Moved)
+        {
+            secondPoint = touch.position;
+            angleX = angleXTemp + (secondPoint.x - firstPoint.x) * 180 / Screen.width;
+            angleY = angleYTemp + (secondPoint.y - firstPoint.y) * 180 / Screen.height;
+            Quaternion rotation = Quaternion.Euler(angleY, angleX, 0f);
+            _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
+        }
+    }
+
     private void Rotate()
     {
         float inputX = Input.GetAxis(AxisManager.MOUSE_X);
@@ -50,21 +108,21 @@ public sealed class CameraController : MonoBehaviour
         if (inputX != 0f || inputY != 0f)
         {
             _localRotation.x += inputX * _mouseSensivity;
-            _localRotation.y += inputY * _mouseSensivity;
+            _localRotation.y -= inputY * _mouseSensivity;
 
-            if (_localRotation.y < _minAngleY)
-            {
-                _localRotation.y = _minAngleY;
-            }
-            else if (_localRotation.y > _maxAngleY)
-            {
-                _localRotation.y = _maxAngleY;
-            }
+            //if (_localRotation.y < _minAngleY)
+            //{
+            //    _localRotation.y = _minAngleY;
+            //}
+            //else if (_localRotation.y > _maxAngleY)
+            //{
+            //    _localRotation.y = _maxAngleY;
+            //}
         }
 
         Quaternion rotation = Quaternion.Euler(_localRotation.y, _localRotation.x, 0f);
         _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
-    }
+    } 
         
     private void Zoom()
     {
