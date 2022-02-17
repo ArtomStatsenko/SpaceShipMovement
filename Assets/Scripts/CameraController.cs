@@ -1,18 +1,18 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
-public class CameraController : MonoBehaviour
+public sealed class CameraController : MonoBehaviour
 {
+    [SerializeField] private bool _isCameraDisabled = false;
     [SerializeField] private float _mouseSensivity = 4f;
     [SerializeField] private float _scrollSensivity = 2f;
-    [SerializeField] private float _orbitDampening = 10f;
+    [SerializeField] private float _orbitDampening = 3f;
     [SerializeField] private float _scrollDampening = 6f;
-    [SerializeField] private bool _isCameraDisabled = false;
     [SerializeField] private float _zooming = 0.3f;
     [SerializeField] private float _maxAngleY = 90f;
     [SerializeField] private float _minAngleY = -90f;
-    [SerializeField] private GameObject _target;
     [SerializeField] private float _followingSpeed = 2f;
+    [SerializeField] private GameObject _target;
 
     private Transform _cameraTransform;
     private Transform _cameraPivotTransform;
