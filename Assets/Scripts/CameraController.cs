@@ -3,15 +3,12 @@
 [RequireComponent(typeof(Camera))]
 public sealed class CameraController : MonoBehaviour
 {
-    [SerializeField] private bool _isCameraDisabled = false;
     [SerializeField] private float _mouseSensivity = 4f;
     [SerializeField] private float _scrollSensivity = 2f;
     [SerializeField] private float _orbitDampening = 3f;
     [SerializeField] private float _scrollDampening = 6f;
     [SerializeField] private float _zooming = 0.3f;
-    [SerializeField] private float _maxAngleY = 90f;
-    [SerializeField] private float _minAngleY = -90f;
-    [SerializeField] private float _followingSpeed = 2f;
+    [SerializeField] private float _followingSpeed = 7f;
     [SerializeField] private GameObject _target;
 
     private Transform _cameraTransform;
@@ -20,6 +17,13 @@ public sealed class CameraController : MonoBehaviour
     private float _cameraDistance = 10f;
     private float _maxCameraDistance = 20f;
     private float _minCameraDistance = 5f;
+    float _angleX = 0;
+    float _angleY = 0;
+    float _angleXTemp = 0;
+    float _angleYTemp = 0;
+    Vector3 _firstPoint = Vector3.zero;
+    Vector3 _secondPoint = Vector3.zero;
+
 
     private void Start()
     {
@@ -29,47 +33,32 @@ public sealed class CameraController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            _isCameraDisabled = !_isCameraDisabled;
-        }
+            //Rotate();
 
-        if (!_isCameraDisabled)
-        {
-            Rotate();
-
-//#if UNITY_EDITOR
-//            MouseClickRotate();
-//#elif UNITY_ANDROID || UNITY_IOS
-//            TouchRotate();
-//#endif
-            Zoom();
+#if UNITY_EDITOR
+        MouseClickRotate();
+#elif UNITY_ANDROID || UNITY_IOS
+            TouchRotate();
+#endif
+        Zoom();
             FollowTarget();
-        }
     }
-
-    float angleX = 0;
-    float angleY = 0;
-    float angleXTemp = 0;
-    float angleYTemp = 0;
-    Vector3 firstPoint = Vector3.zero;
-    Vector3 secondPoint = Vector3.zero;
 
     private void MouseClickRotate()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            firstPoint = Input.mousePosition;
-            angleXTemp = angleX;
-            angleYTemp = angleY;
+            _firstPoint = Input.mousePosition;
+            _angleXTemp = _angleX;
+            _angleYTemp = _angleY;
         }
 
         if (Input.GetMouseButton(0))
         {
-            secondPoint = Input.mousePosition;
-            angleX = angleXTemp + (secondPoint.x - firstPoint.x) * 180 / Screen.width;
-            angleY = angleYTemp + (secondPoint.y - firstPoint.y) * 180 / Screen.height;
-            Quaternion rotation = Quaternion.Euler(angleY, angleX, 0f);
+            _secondPoint = Input.mousePosition;
+            _angleX = _angleXTemp + (_secondPoint.x - _firstPoint.x) * 180f / Screen.width;
+            _angleY = _angleYTemp + (_secondPoint.y - _firstPoint.y) * 180f / Screen.height;
+            Quaternion rotation = Quaternion.Euler(_angleY, _angleX, 0f);
             _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
         }
     }
@@ -85,17 +74,17 @@ public sealed class CameraController : MonoBehaviour
 
         if (touch.phase == TouchPhase.Began)
         {
-            firstPoint = touch.position;
-            angleXTemp = angleX;
-            angleYTemp = angleY;
+            _firstPoint = touch.position;
+            _angleXTemp = _angleX;
+            _angleYTemp = _angleY;
         }
 
         if (touch.phase == TouchPhase.Moved)
         {
-            secondPoint = touch.position;
-            angleX = angleXTemp + (secondPoint.x - firstPoint.x) * 180 / Screen.width;
-            angleY = angleYTemp + (secondPoint.y - firstPoint.y) * 180 / Screen.height;
-            Quaternion rotation = Quaternion.Euler(angleY, angleX, 0f);
+            _secondPoint = touch.position;
+            _angleX = _angleXTemp + (_secondPoint.x - _firstPoint.x) * 180 / Screen.width;
+            _angleY = _angleYTemp + (_secondPoint.y - _firstPoint.y) * 180 / Screen.height;
+            Quaternion rotation = Quaternion.Euler(_angleY, _angleX, 0f);
             _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
         }
     }
@@ -109,15 +98,6 @@ public sealed class CameraController : MonoBehaviour
         {
             _localRotation.x += inputX * _mouseSensivity;
             _localRotation.y -= inputY * _mouseSensivity;
-
-            //if (_localRotation.y < _minAngleY)
-            //{
-            //    _localRotation.y = _minAngleY;
-            //}
-            //else if (_localRotation.y > _maxAngleY)
-            //{
-            //    _localRotation.y = _maxAngleY;
-            //}
         }
 
         Quaternion rotation = Quaternion.Euler(_localRotation.y, _localRotation.x, 0f);

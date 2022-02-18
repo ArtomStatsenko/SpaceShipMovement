@@ -16,23 +16,6 @@ public sealed class ShipController : MonoBehaviour
 
     private void Update()
     {
-        //if (Input.touchCount > 0)
-        //{
-        //    Touch touch = Input.GetTouch(0);
-        //    if (touch.phase == TouchPhase.Began)
-        //    {
-        //        //TODO get position and draw aim
-        //    }
-        //    if (touch.phase == TouchPhase.Moved)
-        //    {
-        //        //TODO get position
-        //    }
-        //    if (touch.phase == TouchPhase.Stationary)
-        //    {
-        //        //TODO get position
-        //    }
-        //}
-
         MoveShip();
         RotateShip();
     }
