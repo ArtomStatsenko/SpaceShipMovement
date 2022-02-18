@@ -1,26 +1,23 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 public sealed class CameraController : MonoBehaviour
 {
-    [SerializeField] private float _mouseSensivity = 4f;
+    [SerializeField] private float _rotationSpeed = 60f;
     [SerializeField] private float _scrollSensivity = 2f;
-    [SerializeField] private float _orbitDampening = 3f;
     [SerializeField] private float _scrollDampening = 6f;
     [SerializeField] private float _zooming = 0.3f;
     [SerializeField] private float _followingSpeed = 7f;
     [SerializeField] private GameObject _target;
 
-    private Transform _cameraTransform;
-    private Transform _cameraPivotTransform;
     private float _cameraDistance = 10f;
     private float _maxCameraDistance = 20f;
     private float _minCameraDistance = 5f;
     private Vector2 _screenCenter;
     private Vector2 _lookInput;
     private Vector2 _mouseDistance;
-    private float _rotationSpeed = 60f;
+    private Transform _cameraTransform;
+    private Transform _cameraPivotTransform;
 
     private void Awake()
     {
