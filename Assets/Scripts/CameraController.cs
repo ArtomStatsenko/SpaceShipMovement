@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 public sealed class CameraController : MonoBehaviour
@@ -13,17 +14,13 @@ public sealed class CameraController : MonoBehaviour
 
     private Transform _cameraTransform;
     private Transform _cameraPivotTransform;
-    private Vector3 _localRotation;
     private float _cameraDistance = 10f;
     private float _maxCameraDistance = 20f;
     private float _minCameraDistance = 5f;
-    float _angleX = 0;
-    float _angleY = 0;
-    float _angleXTemp = 0;
-    float _angleYTemp = 0;
-    Vector3 _firstPoint = Vector3.zero;
-    Vector3 _secondPoint = Vector3.zero;
-
+    private Vector2 _screenCenter;
+    private Vector2 _lookInput;
+    private Vector2 _mouseDistance;
+    private float _rotationSpeed = 60f;
 
     private void Awake()
     {
@@ -31,18 +28,16 @@ public sealed class CameraController : MonoBehaviour
         _cameraPivotTransform = transform.parent;
     }
 
-    //private void Start()
-    //{
-    //    _screenCenter.x = Screen.width * 0.5f;
-    //    _screenCenter.y = Screen.height * 0.5f;
-    //}
+    private void Start()
+    {
+        _screenCenter.x = Screen.width * 0.5f;
+        _screenCenter.y = Screen.height * 0.5f;
+    }
 
     private void LateUpdate()
     {
-        //Rotate();
-
 #if UNITY_EDITOR
-        MouseClickRotate();
+        MouseRotate();
         Zoom();
 #elif UNITY_ANDROID || UNITY_IOS
         TouchRotate();
@@ -50,47 +45,12 @@ public sealed class CameraController : MonoBehaviour
         FollowTarget();
     }
 
-    //private Vector2 _screenCenter;
-    //private Vector2 _lookInput;
-    //private Vector2 _mouseDistance;
-    //private float _rotationSpeed = 90f;
-
-
-    private void MouseClickRotate()
+    private void MouseRotate()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            _firstPoint = Input.mousePosition;
-            _angleXTemp = _angleX;
-            _angleYTemp = _angleY;
-        }
-
         if (Input.GetMouseButton(0))
         {
-            _secondPoint = Input.mousePosition;
-            _angleX = _angleXTemp + (_secondPoint.x - _firstPoint.x) * 180f / Screen.width;
-            _angleY = _angleYTemp + (_secondPoint.y - _firstPoint.y) * 180f / Screen.height;
-            Quaternion rotation = Quaternion.Euler(_angleY, _angleX, 0f);
-            _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
+            Rotate(Input.mousePosition.x, Input.mousePosition.y);
         }
-
-        //_lookInput.x = Input.mousePosition.x;
-        //_lookInput.y = Input.mousePosition.y;
-
-        //_mouseDistance.x = (_lookInput.x - _screenCenter.x) / _screenCenter.y;
-        //_mouseDistance.y = (_lookInput.y - _screenCenter.y) / _screenCenter.y;
-        //_mouseDistance = Vector2.ClampMagnitude(_mouseDistance, 1f);
-        //_mouseDistance *= _rotationSpeed;
-        //_cameraPivotTransform.Rotate(_mouseDistance.x, _mouseDistance.y, 0f, Space.Self);
-
-        ////if (Input.GetMouseButton(0))
-        ////{
-        ////    _secondPoint = Input.mousePosition;
-        ////    _angleX = (_secondPoint.x - _screenCenter.x) * 180f / Screen.width;
-        ////    _angleY = (_secondPoint.y - _screenCenter.y) * 180f / Screen.height;
-        ////    Quaternion rotation = Quaternion.Euler(-_angleY, _angleX, 0f);
-        ////    _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
-        ////}
     }
 
     private void TouchRotate()
@@ -102,37 +62,22 @@ public sealed class CameraController : MonoBehaviour
 
         Touch touch = Input.GetTouch(0);
 
-        if (touch.phase == TouchPhase.Began)
-        {
-            _firstPoint = touch.position;
-            _angleXTemp = _angleX;
-            _angleYTemp = _angleY;
-        }
-
         if (touch.phase == TouchPhase.Moved)
         {
-            _secondPoint = touch.position;
-            _angleX = _angleXTemp + (_secondPoint.x - _firstPoint.x) * 180 / Screen.width;
-            _angleY = _angleYTemp + (_secondPoint.y - _firstPoint.y) * 180 / Screen.height;
-            Quaternion rotation = Quaternion.Euler(_angleY, _angleX, 0f);
-            _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
+            Rotate(touch.position.x, touch.position.y);
         }
     }
 
-    private void Rotate()
+    private void Rotate(float x, float y)
     {
-        float inputX = Input.GetAxis(AxisManager.MOUSE_X);
-        float inputY = Input.GetAxis(AxisManager.MOUSE_Y);
-
-        if (inputX != 0f || inputY != 0f)
-        {
-            _localRotation.x += inputX * _mouseSensivity;
-            _localRotation.y -= inputY * _mouseSensivity;
-        }
-
-        Quaternion rotation = Quaternion.Euler(_localRotation.y, _localRotation.x, 0f);
-        _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
-    } 
+        _lookInput.x = x;
+        _lookInput.y = y;
+        _mouseDistance.x = (_lookInput.x - _screenCenter.x) / _screenCenter.y;
+        _mouseDistance.y = (_lookInput.y - _screenCenter.y) / _screenCenter.y;
+        _mouseDistance *= _rotationSpeed * Time.deltaTime;
+        Vector3 rotation = new Vector3(-_mouseDistance.y, _mouseDistance.x, 0f);
+        _cameraPivotTransform.Rotate(rotation, Space.Self);
+    }
         
     private void Zoom()
     {
