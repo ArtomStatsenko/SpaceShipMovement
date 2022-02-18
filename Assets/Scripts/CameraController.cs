@@ -25,24 +25,36 @@ public sealed class CameraController : MonoBehaviour
     Vector3 _secondPoint = Vector3.zero;
 
 
-    private void Start()
+    private void Awake()
     {
         _cameraTransform = transform;
         _cameraPivotTransform = transform.parent;
     }
 
+    //private void Start()
+    //{
+    //    _screenCenter.x = Screen.width * 0.5f;
+    //    _screenCenter.y = Screen.height * 0.5f;
+    //}
+
     private void LateUpdate()
     {
-            //Rotate();
+        //Rotate();
 
 #if UNITY_EDITOR
         MouseClickRotate();
-#elif UNITY_ANDROID || UNITY_IOS
-            TouchRotate();
-#endif
         Zoom();
-            FollowTarget();
+#elif UNITY_ANDROID || UNITY_IOS
+        TouchRotate();
+#endif
+        FollowTarget();
     }
+
+    //private Vector2 _screenCenter;
+    //private Vector2 _lookInput;
+    //private Vector2 _mouseDistance;
+    //private float _rotationSpeed = 90f;
+
 
     private void MouseClickRotate()
     {
@@ -61,6 +73,24 @@ public sealed class CameraController : MonoBehaviour
             Quaternion rotation = Quaternion.Euler(_angleY, _angleX, 0f);
             _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
         }
+
+        //_lookInput.x = Input.mousePosition.x;
+        //_lookInput.y = Input.mousePosition.y;
+
+        //_mouseDistance.x = (_lookInput.x - _screenCenter.x) / _screenCenter.y;
+        //_mouseDistance.y = (_lookInput.y - _screenCenter.y) / _screenCenter.y;
+        //_mouseDistance = Vector2.ClampMagnitude(_mouseDistance, 1f);
+        //_mouseDistance *= _rotationSpeed;
+        //_cameraPivotTransform.Rotate(_mouseDistance.x, _mouseDistance.y, 0f, Space.Self);
+
+        ////if (Input.GetMouseButton(0))
+        ////{
+        ////    _secondPoint = Input.mousePosition;
+        ////    _angleX = (_secondPoint.x - _screenCenter.x) * 180f / Screen.width;
+        ////    _angleY = (_secondPoint.y - _screenCenter.y) * 180f / Screen.height;
+        ////    Quaternion rotation = Quaternion.Euler(-_angleY, _angleX, 0f);
+        ////    _cameraPivotTransform.rotation = Quaternion.Lerp(_cameraPivotTransform.rotation, rotation, Time.deltaTime * _orbitDampening);
+        ////}
     }
 
     private void TouchRotate()

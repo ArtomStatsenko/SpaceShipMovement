@@ -8,7 +8,7 @@ public sealed class ShipController : MonoBehaviour
     private Transform _shipTransform;
     private Transform _cameraTransform;
 
-    private void Start()
+    private void Awake()
     {
         _shipTransform = transform;
         _cameraTransform = Camera.main.transform;

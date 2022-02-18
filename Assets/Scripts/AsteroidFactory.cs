@@ -16,9 +16,9 @@ public sealed class AsteroidFactory
         _root = new GameObject(ROOT);
     }
 
-    public GameObject CreateAsteroid()
+    public Asteroid CreateAsteroid()
     {
-        GameObject asteroid = Object.Instantiate(Resources.Load<GameObject>(PATH));
+        Asteroid asteroid = Object.Instantiate(Resources.Load<Asteroid>(PATH));
         asteroid.transform.localScale = Vector3.one * Random.Range(_minSize, _maxSize);
         float x = Random.Range(_spawnPoint.position.x - _randomOffset, _spawnPoint.position.x + _randomOffset);
         float y = Random.Range(_spawnPoint.position.y - _randomOffset, _spawnPoint.position.y + _randomOffset);

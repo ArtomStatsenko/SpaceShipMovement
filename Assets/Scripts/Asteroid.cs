@@ -1,26 +1,17 @@
 ﻿using UnityEngine;
+using System;
 
 public sealed class Asteroid : MonoBehaviour
 {
-    private Transform _ship;
-    private float _maxDistance = 200f;
+    public event Action<Asteroid> OnDestroyedEvent;
 
-    private void Start()
+    public void DestroyIfFarFromObject(Transform ship, float maxDistance)
     {
-        _ship = FindObjectOfType<ShipController>().transform;
-    }
+        float distance = Vector3.Magnitude(ship.transform.position - transform.position);
 
-    private void Update()
-    {
-        if (_ship == null)
+        if (distance > maxDistance)
         {
-            return;
-        }
-
-        float distance = Vector3.Magnitude(_ship.transform.position - transform.position);
-
-        if (distance > _maxDistance)
-        {
+            OnDestroyedEvent?.Invoke(this);
             Destroy(gameObject);
         }
     }
